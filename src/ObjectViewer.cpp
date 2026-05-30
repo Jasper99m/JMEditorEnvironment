@@ -1,5 +1,4 @@
 #include "ObjectViewer.h"
-//#include "../../JMgui/JMgui.h"
 #include "../SimEnvironment.h"
 
 ObjectViewer::ObjectViewer(SimEnvironment* Handler, JMwindow* Window, float PosX, float PosY, float SizeX, float SizeY) {
@@ -11,8 +10,6 @@ ObjectViewer::ObjectViewer(SimEnvironment* Handler, JMwindow* Window, float PosX
 	posY = PosY;
 	sizeX = SizeX;
 	sizeY = SizeY;
-	sizeXLast = sizeX;
-	sizeYLast = sizeY;
 	window = Window;
 	gr = window->window;
 	handler = Handler;
@@ -118,10 +115,7 @@ void ObjectViewer::display() {
 	if (xPosRef != nullptr && *xPosRef != posX) { posX = *xPosRef; }
 	if (yPosRef != nullptr && *yPosRef != posY) { posY = *yPosRef; }
 
-	if ((sizeX != guiElements->xSize || sizeY != guiElements->ySize) && sizeX == sizeXLast && sizeY == sizeYLast) { setSize(sizeX, sizeY); }
-
-	if (sizeXLast != sizeX) { sizeXLast = sizeX; }
-	if (sizeYLast != sizeY) { sizeYLast = sizeY; }
+	if ((sizeX != sizeXLast || sizeY != sizeYLast) && !gr->mousePressed()) { setSize(sizeX, sizeY); }
 }
 
 float ObjectViewer::checkMouseOverObject(SimObject* obj) {
@@ -227,15 +221,21 @@ void ObjectViewer::setPos(float x, float y) {
 
 	backgroundElements->xOffset = x;
 	backgroundElements->yOffset = y;
-	guiElements->xOffset = x;
-	guiElements->yOffset = y;
+	guiElements->xOffset = posX + sizeX / 2.0f;
+	guiElements->yOffset = posY - sizeY / 2.0f;
 }
 void ObjectViewer::setSize(float x, float y) {
 	sizeX = x;
 	sizeY = y;
 	rEnvironment->setSize(x, y);
-	guiElements->xSize = x;
-	guiElements->ySize = y;
+	backgroundElements->xSize = x;
+	backgroundElements->ySize = y;
+
+	guiElements->xOffset = posX + sizeX / 2.0f;
+	guiElements->yOffset = posY - sizeY / 2.0f;
+
+	sizeXLast = sizeX;
+	sizeYLast = sizeY;
 }
 
 void ObjectViewer::focusOnObject(SimObject* obj) {
@@ -308,11 +308,69 @@ void ObjectViewer::setupGuiElements() {
 	backgroundElements = new GuiElementHandler(window);
 	backgroundElements->xOffset = posX;
 	backgroundElements->yOffset = posY;
+	backgroundElements->xSize = sizeX;
+	backgroundElements->ySize = sizeY;
 	//backgroundElements->addElement(new BackgroundBox(0.0f, 0.0f, sizeX + 10.0f, sizeY + 10.0f));
 
 	guiElements = new GuiElementHandler(window);
-	guiElements->xOffset = posX;
-	guiElements->yOffset = posY;
+	guiElements->xOffset = posX + sizeX / 2.0f;
+	guiElements->yOffset = posY - sizeY / 2.0f;
+
+	//Help button
+	JMGraphics::Buffer* helpButtImage = new JMGraphics::Buffer(20.0f, 20.0f, window->window);
+	helpButtImage->beginDraw();
+	gr->fill(0.8f);
+	gr->setFont(window->font_large);
+	gr->textSize(1.0f);
+	gr->text("?", 2.0f, 2.0f);
+
+	helpButtImage->endDraw();
+
+	CustomButton* helpButton = new CustomButton(-25.0f, 15.0f, helpButtImage);
+	helpButton->helpMessage = "Rotate view:\n    Right mouse button\n    or V + arrows\n    or V + 1, 2 or 3\nTranslate view:  shift + right mouse button\nZoom:  Mouse wheel or ctrl + '+'/'-'"
+		"\nOrthographic / perspective view:  ctrl + O\nSpin view:  ctrl + shift + R\n\nSelect object : Left mouse button\nSecond select object : ctrl or shift + left mouse button\nDeselect all : shift + A"
+		"\nRotate selected : R\nTranslate selected : T\nScale selected : S\nDuplicate selected : shift + D\nDelete selected : backspace\nFocus on selected : shift + F\nHide / unhide selected : ctrl + H\nUnhide all : alt + H"
+		"\nWhen transfroming selected:\n    Lock to axis:  X, Y or Z\n    Lock axis:    shift + X, Y or Z\n    Snapping:  shift\n    Transform by specific value:  Lock to axis then type value"
+		"\n\nUndo: ctrl + Z\nRedo : ctrl + Y\nSave : ctrl + S\nSave as : ctrl + shift + S\nLoad file : ctrl + L";
+
+	guiElements->addElement(helpButton);
+
+	//Projection mode button
+	JMGraphics::Buffer* projButtImage = new JMGraphics::Buffer(20.0f, 20.0f, window->window);
+	projButtImage->beginDraw();
+
+	gr->noFill();
+	gr->strokeWeight(1.f);
+	gr->stroke(0.4f);
+	gr->rect(projButtImage->width() / 2.0f - 3.0f, projButtImage->height() / 2.0f + 3.0f, projButtImage->width() - 12.0f, projButtImage->height() - 12.0f);
+	gr->stroke(0.8f);
+	gr->rect(projButtImage->width() / 2.0f + 3.0f, projButtImage->height() / 2.0f - 3.0f, projButtImage->width() - 8.0f, projButtImage->height() - 8.0f);
+
+	projButtImage->endDraw();
+
+	CustomButton* projModeButton = new CustomButton(-55.0f, 15.0f, projButtImage);
+	projModeButton->event_clicked->addListener([this](JMeventDispatcher::Event* E) {this->viewBuffer->perspectiveProjection = !this->viewBuffer->perspectiveProjection; });
+
+	guiElements->addElement(projModeButton);
+
+	//Rotate button
+	JMGraphics::Buffer* rotButtImage = new JMGraphics::Buffer(20.0f, 20.0f, window->window);
+	rotButtImage->beginDraw();
+
+	gr->strokeWeight(2.0f);
+	gr->stroke(0.8f);
+	gr->noFill();
+
+	gr->arc(rotButtImage->width() / 2.0f, rotButtImage->height() / 2.0f, rotButtImage->width() -10.0f, rotButtImage->height() -10.0f, 0.0f, PI * 1.5f);
+	gr->translate(rotButtImage->width() - 5.0f, rotButtImage->height() / 2.0f - 5.0f);
+	gr->line(0.0f, 0.0f, 5.0f, 5.0f);
+	gr->line(0.0f, 0.0f, -5.0f, 5.0f);
+
+	rotButtImage->endDraw();
+
+	CustomButton* rotButton = new CustomButton(-85.0f, 15.0f, rotButtImage);
+	rotButton->event_clicked->addListener([this](JMeventDispatcher::Event* E) { this->spin = !this->spin; this->movingView = false; });
+	guiElements->addElement(rotButton);
 }
 
 void ObjectViewer::renderAxisDisp() {

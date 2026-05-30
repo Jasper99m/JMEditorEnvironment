@@ -34,7 +34,7 @@ public:
 
 	///Returns the distance from the camera to the object if the mouse is over it, else returns -1.0f. Is kind of expensive, not recomended to call every frame.
 	float checkMouseOverObject(SimObject* obj);
-	///returns true if the mouse if over the viewer.
+	///returns true if the mouse is over the viewer.
 	bool mouseOver() const;
 
 	///Returns true if an object is being translated, rotated or scaled in the viewport
@@ -60,7 +60,7 @@ public:
 	RenderEnvironment* rEnvironment = nullptr;
 
 	///Starts translating the selected object if pressed.
-	unsigned int translateKey = GLFW_KEY_G;
+	unsigned int translateKey = GLFW_KEY_T;
 	///Starts rotating the selected object if pressed.
 	unsigned int rotateKey = GLFW_KEY_R;
 	///Starts scaling the selected object if pressed.
