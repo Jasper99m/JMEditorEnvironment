@@ -23,6 +23,8 @@ Docs:  https://jasper99m.github.io/JMEditorEnvironment/
 
 # Setup
 JMGraphics and JMgui must both be included in your project as seperate submodules for this library to work.
+https://github.com/Jasper99m/JMGraphics https://github.com/Jasper99m/JMgui
+
 Everything is designed to work with CMake and each library has its own CMakeLists.txt file.
 If your're using CMake, include these libraries on your CMakeLists.txt file by adding
 ```
