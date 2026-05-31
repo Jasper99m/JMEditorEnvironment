@@ -15,6 +15,9 @@ and other custom graphics created using JMgui or JMGraphics.
 
 A built in serialization system allows all SimEnvironments to be saved and loaded from files with a custom file extension.
 
+<img width="1918" height="1021" alt="JMEditorEnvironmentExample1" src="https://github.com/user-attachments/assets/0ef27df6-df91-4274-91f4-f8ab40e5528c" /><img width="1918" height="1018" alt="JMEditorEnvironmentExample2" src="https://github.com/user-attachments/assets/803fc003-0a87-4834-a9c7-29ef1349eb88" />
+
+For a pre made example project to use as a starting point, go here:  https://github.com/Jasper99m/JMEditorEnvironmentExample
 
 # Setup
 JMGraphics and JMgui must both be included in your project as seperate submodules for this library to work.
