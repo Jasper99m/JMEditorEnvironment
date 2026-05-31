@@ -51,6 +51,7 @@ void SimEnvironment::displayViewer() {
 		return;
 
 	viewer->display();
+	checkWindowResized(viewer->window->window);
 
 	//check if any of the objects have been clicked on in the viewer
 	if (selectInViewer && viewer->gr->mouseClicked() && viewer->mouseOver()) {
@@ -307,6 +308,7 @@ void SimEnvironment::displayPropertiesMenu() {
 		return;
 
 	propertiesMenu->display();
+	checkWindowResized(propertiesMenu->window->window);
 }
 
 void SimEnvironment::setObjectMenus() {
@@ -344,7 +346,7 @@ void SimEnvironment::displaySelector() {
 		return;
 
 	selector->display();
-
+	checkWindowResized(selector->window->window);
 }
 
 void SimEnvironment::setupObjectDataWindow(JMwindow* Window, float posX, float posY, float sizeX, float sizeY) {
@@ -367,6 +369,7 @@ void SimEnvironment::displayObjectDataWindow() {
 	}
 
 	objectDataBackground->display();
+	checkWindowResized(objectDataBackground->window->window);
 
 	if (selectedObj == nullptr) {
 		return;
@@ -858,4 +861,13 @@ void SimEnvironment::setInfoBarMessage(std::string message) {
 
 void SimEnvironment::registerDerivedSimObject(const std::string& objectType, std::function<SimObject* ()> constructor) {
 	loadFactory[objectType] = std::move(constructor);
+}
+
+void SimEnvironment::checkWindowResized(JMGraphics* gr) {
+	if (windowWidthLast == gr->width() && windowHeightLast == gr->height()) { return; }
+
+	updateGuides();
+
+	windowWidthLast = gr->width();
+	windowHeightLast = gr->height();
 }

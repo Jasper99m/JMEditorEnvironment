@@ -443,6 +443,8 @@ private:
 	///Creates two new guiGuideCenters and pushes them two the back of the guide center vectors.
 	bool createGuideCenters(unsigned int x1, unsigned int x2, unsigned int y1, unsigned int y2);
 
+	void checkWindowResized(JMGraphics* gr);
+
 	///Guide line
 	struct guiGuide {
 		float pos = 0.0f;
@@ -493,6 +495,9 @@ private:
 	std::mutex renderMtx;
 
 	bool ObjectsFrozen = false;
+
+	float windowWidthLast = 0.0f;
+	float windowHeightLast = 0.0f;
 
 	SimResourceManager* manager;
 };
