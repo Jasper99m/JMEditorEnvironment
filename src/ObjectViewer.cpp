@@ -28,7 +28,7 @@ ObjectViewer::~ObjectViewer() {
 
 void ObjectViewer::renderThread(JMGraphics* g) {
 
-	if (spin) { viewRotY += 0.0004f * g->frameTime(); }
+	if (spin) { viewRotY += 0.00015f * g->frameTime(); }
 
 	if (gridBuffer == nullptr) {
 		gridBuffer = new JMGraphics::Buffer(2048, 2048, rEnvironment->gr);
